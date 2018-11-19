@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "TransactionsDBStorage.h"
-
+#include "SlotWrapper.h"
 const QString pragmaSyncOff = "PRAGMA synchronous=OFF";
 const QString pragmaSyncNormal = "PRAGMA synchronous=NORMAL";
 const QString pragmaSyncFull = "PRAGMA synchronous=FULL";
@@ -52,6 +52,11 @@ void emptyInit(transactions::TransactionsDBStorage &)
 {
 }
 
+void insertTransaction(transactions::TransactionsDBStorage &db)
+{
+    db.addPayment("mh", QString("gfklklkltrklklgfmjgfhg"), "address100", true, "user7", "user1", "9000000000000000000", 1000 + 2, "nvcmnjkdfjkgf", "100", 8896865, false, false, "100", "kfkfgk", transactions::Transaction::OK, transactions::Transaction::FORGING, 10000);
+}
+
 void insert3000TransactionsT(transactions::TransactionsDBStorage &db)
 {
     auto transactionGuard = db.beginTransaction();
@@ -63,18 +68,17 @@ void insert3000TransactionsT(transactions::TransactionsDBStorage &db)
 
 void insert3000Transactions(transactions::TransactionsDBStorage &db)
 {
-    for (qint64 n = 0; n < 1; n++) {
+    for (qint64 n = 0; n < 3000; n++) {
         db.addPayment("mh", QString("gfklklkltrklklgfmjgfhg%1").arg(QString::number(n)), "address100", true, "user7", "user1", "9000000000000000000", 1000 + 2 * n, "nvcmnjkdfjkgf", "100", 8896865, false, false, "100", "kfkfgk", transactions::Transaction::OK, transactions::Transaction::FORGING, 10000 + n);
     }
 }
 
 void insert3000TransactionsV2(transactions::TransactionsDBStorage &db)
 {
-    for (qint64 n = 0; n < 1; n++) {
-        db.addPayment("mh", QString("gfklklkltrklklgfmjgfhg%1").arg(QString::number(n)), "address100", true, "user7", "user1", "9000000000000000000", 1000 + 2 * n, "nvcmnjkdfjkgf", "100", 8896865, false, false, "100", "kfkfgk", transactions::Transaction::OK, transactions::Transaction::FORGING, 10000 + n);
+    for (qint64 n = 0; n < 3000; n++) {
+        db.addPaymentV2("mh", QString("gfklklkltrklklgfmjgfhg%1").arg(QString::number(n)), "address100", true, "user7", "user1", "9000000000000000000", 1000 + 2 * n, "nvcmnjkdfjkgf", "100", 8896865, false, false, "100", "kfkfgk", transactions::Transaction::OK, transactions::Transaction::FORGING, 10000 + n);
     }
 }
-
 
 void insert3000TransactionsV(transactions::TransactionsDBStorage &db)
 {
@@ -113,6 +117,22 @@ int main(int argc, char *argv[])
     //QCoreApplication a(argc, argv);
 
     qDebug() << "Inserts 3000 transactions";
+    calcTime(insert3000Transactions, emptyInit, QStringList{pragmaSyncFull, pragmaJournalDelete});
+    qDebug() << "Inserts 3000 transactions";
+    calcTime(insert3000Transactions, emptyInit, QStringList{pragmaSyncNormal, pragmaJournalWAL});
+
+    qDebug() << "Inserts 3000 transactions precompiled";
+    calcTime(insert3000TransactionsV2, emptyInit, QStringList{pragmaSyncFull, pragmaJournalDelete});
+    qDebug() << "Inserts 3000 transactions precompiled";
+    calcTime(insert3000TransactionsV2, emptyInit, QStringList{pragmaSyncNormal, pragmaJournalWAL});
+
+    /*
+    qDebug() << "Inserts 3000 transactions";
+    calcTime(insertTransaction, emptyInit, QStringList{pragmaSyncFull, pragmaJournalDelete});
+    qDebug() << "Inserts 3000 transactions V2";
+    calcTime(insertTransaction, emptyInit, QStringList{pragmaSyncNormal, pragmaJournalWAL});
+
+    qDebug() << "Inserts 3000 transactions";
     calcTime(insert3000TransactionsT, emptyInit, QStringList{pragmaSyncFull, pragmaJournalDelete});
     qDebug() << "Inserts 3000 transactions V2";
     calcTime(insert3000TransactionsT, emptyInit, QStringList{pragmaSyncNormal, pragmaJournalWAL});
@@ -121,6 +141,7 @@ int main(int argc, char *argv[])
     qDebug() << "Inserts 3000 transactions vector";
     calcTime(insert3000TransactionsV, emptyInit, QStringList{pragmaSyncNormal, pragmaJournalWAL});
 
+    */
     //calcTime(insert3000Transactions, emptyInit);
 
     /*qDebug() << "Insert 2000 transactions";
