@@ -12,7 +12,7 @@ TransactionsDBStorage::TransactionsDBStorage(const QString &path, QObject *paren
     : DBStorage(path, databaseName, parent)
     , m_iquery(database())
 {
-CHECK(m_iquery.prepare(insertPayment), m_iquery.lastError().text().toStdString());
+    //CHECK(m_iquery.prepare(insertPayment), m_iquery.lastError().text().toStdString());
 }
 
 int TransactionsDBStorage::currentVersion() const
@@ -472,6 +472,7 @@ void TransactionsDBStorage::createDatabase()
     createIndex(createPaymentsIndex3);
     createIndex(createPaymentsUniqueIndex);
     createIndex(createTrackedUniqueIndex);
+    CHECK(m_iquery.prepare(insertPayment), m_iquery.lastError().text().toStdString());
 }
 
 void TransactionsDBStorage::setTransactionFromQuery(QSqlQuery &query, Transaction &trans) const

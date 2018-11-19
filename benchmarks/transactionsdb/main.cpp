@@ -28,8 +28,8 @@ void calcTime(TestFunction func, TestFunction funcp, const QStringList &pragmas 
     const int nmax = 20;
     qreal time = 0.0;
     for (int n = 0; n < nmax; n++) {
-        if (QFile::exists("messenger.db"))
-            QFile::remove("messenger.db");
+        if (QFile::exists("payments.db"))
+            QFile::remove("payments.db");
         transactions::TransactionsDBStorage db;
         db.init();
         for (const QString &sql: pragmas)
@@ -60,7 +60,7 @@ void insertTransaction(transactions::TransactionsDBStorage &db)
 void insert3000TransactionsT(transactions::TransactionsDBStorage &db)
 {
     auto transactionGuard = db.beginTransaction();
-    for (qint64 n = 0; n < 3000; n++) {
+    for (qint64 n = 0; n < 1000; n++) {
         db.addPayment("mh", QString("gfklklkltrklklgfmjgfhg%1").arg(QString::number(n)), "address100", true, "user7", "user1", "9000000000000000000", 1000 + 2 * n, "nvcmnjkdfjkgf", "100", 8896865, false, false, "100", "kfkfgk", transactions::Transaction::OK, transactions::Transaction::FORGING, 10000 + n);
     }
     transactionGuard.commit();
@@ -68,14 +68,14 @@ void insert3000TransactionsT(transactions::TransactionsDBStorage &db)
 
 void insert3000Transactions(transactions::TransactionsDBStorage &db)
 {
-    for (qint64 n = 0; n < 3000; n++) {
+    for (qint64 n = 0; n < 1000; n++) {
         db.addPayment("mh", QString("gfklklkltrklklgfmjgfhg%1").arg(QString::number(n)), "address100", true, "user7", "user1", "9000000000000000000", 1000 + 2 * n, "nvcmnjkdfjkgf", "100", 8896865, false, false, "100", "kfkfgk", transactions::Transaction::OK, transactions::Transaction::FORGING, 10000 + n);
     }
 }
 
 void insert3000TransactionsV2(transactions::TransactionsDBStorage &db)
 {
-    for (qint64 n = 0; n < 3000; n++) {
+    for (qint64 n = 0; n < 1000; n++) {
         db.addPaymentV2("mh", QString("gfklklkltrklklgfmjgfhg%1").arg(QString::number(n)), "address100", true, "user7", "user1", "9000000000000000000", 1000 + 2 * n, "nvcmnjkdfjkgf", "100", 8896865, false, false, "100", "kfkfgk", transactions::Transaction::OK, transactions::Transaction::FORGING, 10000 + n);
     }
 }
@@ -84,7 +84,7 @@ void insert3000TransactionsV(transactions::TransactionsDBStorage &db)
 {
     std::vector<transactions::Transaction> transactions;
     transactions.reserve(3100);
-    for (qint64 n = 0; n < 3000; n++) {
+    for (qint64 n = 0; n < 1000; n++) {
         transactions::Transaction trans;
         trans.currency = "mh";
         trans.tx = QString("gfklklkltrklklgfmjgfhg%1").arg(QString::number(n));
@@ -115,12 +115,10 @@ void selectTransactions(transactions::TransactionsDBStorage &db)
 int main(int argc, char *argv[])
 {
     //QCoreApplication a(argc, argv);
-
     qDebug() << "Inserts 3000 transactions";
     calcTime(insert3000Transactions, emptyInit, QStringList{pragmaSyncFull, pragmaJournalDelete});
     qDebug() << "Inserts 3000 transactions";
     calcTime(insert3000Transactions, emptyInit, QStringList{pragmaSyncNormal, pragmaJournalWAL});
-
     qDebug() << "Inserts 3000 transactions precompiled";
     calcTime(insert3000TransactionsV2, emptyInit, QStringList{pragmaSyncFull, pragmaJournalDelete});
     qDebug() << "Inserts 3000 transactions precompiled";
