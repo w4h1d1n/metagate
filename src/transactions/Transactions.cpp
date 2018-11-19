@@ -103,11 +103,12 @@ void Transactions::runCallbackJsWrap(const Func &callback) {
 }
 
 void Transactions::newBalance(const QString &address, const QString &currency, const BalanceInfo &balance, const std::vector<Transaction> &txs, const std::shared_ptr<ServersStruct> &servStruct) {
-    auto transactionGuard = db.beginTransaction();
-    for (const Transaction &tx: txs) {
-        db.addPayment(tx);
-    }
-    transactionGuard.commit();
+    db.addPayments(txs);
+//    auto transactionGuard = db.beginTransaction();
+//    for (const Transaction &tx: txs) {
+//        db.addPayment(tx);
+//    }
+//    transactionGuard.commit();
     emit javascriptWrapper.newBalanceSig(address, currency, balance);
     updateBalanceTime(currency, servStruct);
 }
@@ -288,11 +289,12 @@ END_SLOT_WRAPPER
 void Transactions::onRegisterAddresses(const std::vector<AddressInfo> &addresses, const RegisterAddressCallback &callback) {
 BEGIN_SLOT_WRAPPER
     const TypedException exception = apiVrapper2([&, this] {
-        auto transactionGuard = db.beginTransaction();
-        for (const AddressInfo &address: addresses) {
-            db.addTracked(address);
-        }
-        transactionGuard.commit();
+        db.addTracked(addresses);
+//        auto transactionGuard = db.beginTransaction();
+//        for (const AddressInfo &address: addresses) {
+//            db.addTracked(address);
+//        }
+//        transactionGuard.commit();
     });
     runCallback(std::bind(callback, exception));
 END_SLOT_WRAPPER

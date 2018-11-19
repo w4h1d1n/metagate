@@ -10,8 +10,9 @@ namespace transactions {
 
 TransactionsDBStorage::TransactionsDBStorage(const QString &path, QObject *parent)
     : DBStorage(path, databaseName, parent)
+    , m_iquery(database())
 {
-
+CHECK(m_iquery.prepare(insertPayment), m_iquery.lastError().text().toStdString());
 }
 
 int TransactionsDBStorage::currentVersion() const
@@ -49,14 +50,15 @@ void TransactionsDBStorage::addPayment(const QString &currency, const QString &t
 
 }
 
-void TransactionsDBStorage::addPaymentV2(const QString &currency, const QString &txid, const QString &address, bool isInput, const QString &ufrom, const QString &uto, const QString &value, quint64 ts, const QString &data, const QString &fee, qint64 nonce, bool isSetDelegate, bool isDelegate, QString delegateValue)
+void TransactionsDBStorage::addPaymentV2(const QString &currency, const QString &txid, const QString &address, bool isInput, const QString &ufrom, const QString &uto, const QString &value, quint64 ts, const QString &data, const QString &fee, qint64 nonce, bool isSetDelegate, bool isDelegate, QString delegateValue, const QString &delegateHash,
+                                         Transaction::Status status, Transaction::Type type, qint64 blockNumber)
 {
-    static QSqlQuery m_iquery(database());
-    bool prepared = false;
-    if (!prepared) {
-        CHECK(m_iquery.prepare(insertPayment), m_iquery.lastError().text().toStdString());
-        prepared = true;
-    }
+//    static QSqlQuery m_iquery(database());
+//    static bool prepared = false;
+//    if (!prepared) {
+//        CHECK(m_iquery.prepare(insertPayment), m_iquery.lastError().text().toStdString());
+//        prepared = true;
+//    }
     m_iquery.bindValue(":currency", currency);
     m_iquery.bindValue(":txid", txid);
     m_iquery.bindValue(":address", address);
@@ -71,6 +73,10 @@ void TransactionsDBStorage::addPaymentV2(const QString &currency, const QString 
     m_iquery.bindValue(":isSetDelegate", isSetDelegate);
     m_iquery.bindValue(":isDelegate", isDelegate);
     m_iquery.bindValue(":delegateValue", delegateValue);
+    m_iquery.bindValue(":delegateHash", delegateHash);
+    m_iquery.bindValue(":status", status);
+    m_iquery.bindValue(":type", type);
+    m_iquery.bindValue(":blockNumber", blockNumber);
     CHECK(m_iquery.exec(), m_iquery.lastError().text().toStdString());
 }
 
@@ -405,6 +411,22 @@ void TransactionsDBStorage::addTracked(const QString &currency, const QString &a
 void TransactionsDBStorage::addTracked(const AddressInfo &info)
 {
     addTracked(info.currency, info.address, info.name, info.type, info.group);
+}
+
+void TransactionsDBStorage::addTracked(const std::vector<AddressInfo> &addresses)
+{
+    auto transactionGuard = beginTransaction();
+    QSqlQuery query(database());
+    CHECK(query.prepare(insertTracked), query.lastError().text().toStdString());
+    for (const AddressInfo &info: addresses) {
+        query.bindValue(":currency", info.currency);
+        query.bindValue(":address", info.address);
+        query.bindValue(":name", info.name);
+        query.bindValue(":type", info.type);
+        query.bindValue(":tgroup", info.group);
+        CHECK(query.exec(), query.lastError().text().toStdString());
+    }
+    transactionGuard.commit();
 }
 
 std::vector<AddressInfo> TransactionsDBStorage::getTrackedForGroup(const QString &tgroup)

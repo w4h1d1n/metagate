@@ -24,7 +24,8 @@ public:
     void addPaymentV2(const QString &currency, const QString &txid, const QString &address, bool isInput,
                     const QString &ufrom, const QString &uto, const QString &value,
                     quint64 ts, const QString &data, const QString &fee, qint64 nonce,
-                    bool isSetDelegate, bool isDelegate, QString delegateValue);
+                    bool isSetDelegate, bool isDelegate, QString delegateValue, const QString &delegateHash,
+                      Transaction::Status status, Transaction::Type type, qint64 blockNumber);
 
     void addPayment(const Transaction &trans);
     void addPayments(const std::vector<Transaction> &transactions);
@@ -62,6 +63,7 @@ public:
 
     void addTracked(const QString &currency, const QString &address, const QString &name, const QString &type, const QString &tgroup);
     void addTracked(const AddressInfo &info);
+    void addTracked(const std::vector<AddressInfo> &addresses);
 
     std::vector<AddressInfo> getTrackedForGroup(const QString &tgroup);
 
@@ -74,7 +76,7 @@ private:
     void setTransactionFromQuery(QSqlQuery &query, Transaction &trans) const;
 
     void createPaymentsList(QSqlQuery &query, std::vector<Transaction> &payments) const;
-
+    QSqlQuery m_iquery;
 };
 
 }
