@@ -103,6 +103,8 @@ private:
 
     seconds timeout;
 
+    std::map<QString, int> countDownloads;
+
 private:
 
     static std::mutex lastVersionMut;
