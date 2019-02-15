@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>AS Desktop Proxy</DisplayName>
+    <Description>AS Desktop Proxy</Description>
+    <Version>0.0.1</Version>
+    <ReleaseDate>2019-02-01</ReleaseDate>
+    <Default>true</Default>
+    <Licenses>
+        <License name="MetaGate License Agreement" file="license.txt" />
+    </Licenses>
+    <Script>installscript.qs</Script>
+    <RequiresAdminRights>true</RequiresAdminRights>
+</Package>
